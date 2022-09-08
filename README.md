@@ -36,7 +36,7 @@ $ uvicorn main:app --reload
 
 ### Path Operation
 
-Each Path operation has a `path, method, and function`
+Each Path operation has a `path, method, and function`.
 Common Path methods are `get, post, put, delete`
 
 ### Request Body
