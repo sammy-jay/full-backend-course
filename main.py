@@ -1,3 +1,5 @@
+from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -84,3 +86,22 @@ def delete_post(id: int, response: Response):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     return {"data": None}
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Genx",
+        version="1.0.0",
+        description="This is a very custom OpenAPI schema",
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
