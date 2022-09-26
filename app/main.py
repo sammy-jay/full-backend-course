@@ -4,6 +4,10 @@ from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Union, Optional
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
+
 
 app = FastAPI()
 
@@ -12,14 +16,18 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Union[float, None] = None
 
 
-class UpdatePost(Post):
-    title: Optional[str]
-    content: Optional[str]
-    published: Optional[bool]
-    rating: Optional[float]
+while True:
+    try:
+        conn = psycopg2.connect(host='localhost', database='fastapi-project',
+                                user='postgres', password='postgres', cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print("Connection successful...")
+        break
+    except Exception as error:
+        print("Error", error)
+        time.sleep(2)
 
 
 my_posts = [
@@ -35,11 +43,6 @@ def find_post(id):
         if post["id"] == id:
             return post
     return {}
-
-
-@app.get("/")
-def index():
-    return {"msg": "Welcome to my API"}
 
 
 @app.get("/posts/", status_code=status.HTTP_200_OK)
@@ -65,7 +68,7 @@ def create_post(post: Post):
 
 
 @app.patch("/posts/{id}", status_code=status.HTTP_200_OK)
-def update_post(id: int, updated_post: UpdatePost):
+def update_post(id: int, updated_post: Post):
     post = find_post(id)
     if not post:
         raise HTTPException(
